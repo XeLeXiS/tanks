@@ -19,14 +19,57 @@
     <body>
         <canvas id="canvas"></canvas>
         <script>
-            const fieldWidth  = 20
-            const fieldHeight = 20
+            const fieldWidth  = 30
+            const fieldHeight = 30
 
             let cellSize
             let fieldScreenWidth
             let fieldScreenHeight
             let fieldCenterShiftX
-            let fieldCenterShiftY
+            let fieldCenterShiftY 
+
+            const gameObjects = {
+                "Tank1": {
+                    "x": 0,
+                    "y": 0,
+                    "dx": 1,
+                    "dy": 0,
+                    "c": "red",
+                    "t": "t"
+                },
+                "Tank2": {
+                    "x": fieldWidth - 1,
+                    "y": 0,
+                    "dx": -1,
+                    "dy": 0,
+                    "c": "green",
+                    "t": "t"
+                },
+                "Tank3": {
+                    "x": fieldWidth - 1,
+                    "y": fieldHeight - 1,
+                    "dx": 1,
+                    "dy": 0,
+                    "c": "blue",
+                    "t": "t"
+                },
+                "Tank4": {
+                    "x": 0,
+                    "y": fieldHeight - 1,
+                    "dx": 1,
+                    "dy": 0,
+                    "c": "yellow",
+                    "t": "t"
+                },
+                "Bullet5": {
+                    "x": fieldHeight / 2,
+                    "y": fieldHeight / 2,
+                    "dx": 1,
+                    "dy": 0,
+                    "c": "white",
+                    "t": "b"
+                },
+            }
 
             function setup(ctx, w, h) { 
                 cellSize = Math.min(w / fieldWidth, h / fieldHeight)
@@ -42,7 +85,7 @@
                 ctx.beginPath()
                 ctx.rect(0, 0, w, h)
                 ctx.fill()
-                
+                // Код рисования поля
                 for (let y = 0; y < fieldHeight; ++y) {
                     for (let x = 0; x < fieldWidth; ++x) {
                         const screenX = fieldCenterShiftX + x * cellSize
@@ -53,7 +96,15 @@
                         ctx.fill()
                     }
                 }
-
+                // код рисования игровых объектов
+                for (const [id, gameObject] of Object.entries(gameObjects)) {
+                    const screenX = fieldCenterShiftX + gameObject.x * cellSize
+                    const screenY = fieldCenterShiftY + gameObject.y * cellSize
+                    ctx.fillStyle = gameObject.c
+                    ctx.beginPath()
+                    ctx.rect(screenX + 1, screenY + 1, cellSize - 2, cellSize - 2)
+                    ctx.fill()
+                }
                 window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp));
             }
             function keyDown(key) {
