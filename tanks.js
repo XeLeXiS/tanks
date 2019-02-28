@@ -14,24 +14,24 @@ const fieldWidth  = 20
 const fieldHeight = 20
 const bases = [
     {
-    'x': 0, 'y': 0,
-    'dx': 1, 'dy': 0,
-    'c': 'red'
+        'x': 0, 'y': 0,
+        'dx': 1, 'dy': 0,
+        'c': 'red'
     },
     {
-    'x': fieldWidth - 1,'y': 0,
-    'dx': -1,'dy': 0,
-    'c': 'green'
+        'x': fieldWidth - 1,'y': 0,
+        'dx': -1,'dy': 0,
+        'c': 'green'
     },
     {
-    'x': fieldWidth - 1,'y': fieldHeight - 1,
-    'dx': -1,'dy': 0,
-    'c': 'blue'
+        'x': fieldWidth - 1,'y': fieldHeight - 1,
+        'dx': -1,'dy': 0,
+        'c': 'blue'
      },
     {
-    'x': 0, 'y': fieldHeight - 1,
-    'dx': -1,'dy': 0,
-    'c': 'yellow'
+        'x': 0, 'y': fieldHeight - 1,
+        'dx': -1,'dy': 0,
+        'c': 'yellow'
     }
 ]
 
@@ -46,10 +46,10 @@ const sendGameObjectUpdate = id => {
     const msg = { }; msg[id] = gameObjects[id]
     io.emit('upd', msg)
 }
-const destroyGameObject = objectsToDestroy => {
+const destroyGameObjects = objectsToDestroy => {
     io.emit('dstr', objectsToDestroy)
-    for (const gameObject of objectsToDestroy) {
-        delete gameObjects[gameObject]
+    for (const id of objectsToDestroy) {
+        delete gameObjects[id]
     }
 }
 
@@ -77,7 +77,7 @@ io.on('connection', socket => {
         't': 't'
     }
     sendGameState(); // передаем новому клиенту ВСЁ состояние игры на данный момент
-
+    sendGameObjectUpdate(socket.id)
     // Обработка нажатий клавиши из браузера клиента
     socket.on('cmd', key => {
         console.log(`Client ${socket.id} command ${key}`)
@@ -132,7 +132,7 @@ io.on('connection', socket => {
     socket.on(`disconnect`, () => {
         console.log(`Client ${socket.io} disconnected`)
 
-        destroyGameObject([socket.id])
+        destroyGameObjects([socket.id])
     })
 })
 
@@ -153,7 +153,7 @@ http.listen(port, () => { // порт для HTTP без указания в а�
 
             if (bullet.x < 0 || bullet.x >= fieldWidth ||
                 bullet.y < 0 || bullet.y >= fieldHeight) {
-                destroyGameObject([id])
+                destroyGameObjects([id])
             }
         }
         // Проверка столкновений
@@ -162,7 +162,7 @@ http.listen(port, () => { // порт для HTTP без указания в а�
                 if (gameObject == otherGameObject) continue
                 if (gameObject.x == otherGameObject.x &&
                     gameObject.y == otherGameObject.y) {
-                    destroyGameObject([id, otherID])
+                    destroyGameObjects([id, otherID])
                 }
             }
         }
