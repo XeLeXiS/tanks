@@ -22,8 +22,8 @@
         <script>
             let socket
 
-            const fieldWidth  = 30
-            const fieldHeight = 30
+            const fieldWidth  = 20
+            const fieldHeight = 20
 
             let cellSize
             let fieldScreenWidth
@@ -31,60 +31,28 @@
             let fieldCenterShiftX
             let fieldCenterShiftY 
 
-            const gameObjects = {
-                "Tank1": {
-                    "x": 0,
-                    "y": 0,
-                    "dx": 1,
-                    "dy": 0,
-                    "c": "red",
-                    "t": "t"
-                },
-                "Tank2": {
-                    "x": fieldWidth - 1,
-                    "y": 0,
-                    "dx": -1,
-                    "dy": 0,
-                    "c": "green",
-                    "t": "t"
-                },
-                "Tank3": {
-                    "x": fieldWidth - 1,
-                    "y": fieldHeight - 1,
-                    "dx": 1,
-                    "dy": 0,
-                    "c": "blue",
-                    "t": "t"
-                },
-                "Tank4": {
-                    "x": 0,
-                    "y": fieldHeight - 1,
-                    "dx": 1,
-                    "dy": 0,
-                    "c": "yellow",
-                    "t": "t"
-                },
-                "Bullet5": {
-                    "x": fieldHeight / 2,
-                    "y": fieldHeight / 2,
-                    "dx": 1,
-                    "dy": 0,
-                    "c": "white",
-                    "t": "b"
-                },
-            }
+            let gameObjects = { }
 
             function setup(ctx, w, h) {
                 socket = io()
+                socket.on('upd', msg => {
+                    gameObjects = Object.assign({}, gameObjects, msg);
+                });
+                socket.on('dstr', msg => {
+                    for (let i = 0; i < msg.length; ++i) {
+                        delete gameObjects[msg[i]]
+                    }
+                });
 
                 cellSize = Math.min(w / fieldWidth, h / fieldHeight)
-                fieldScreenWidth  = fieldWidth * cellSize
                 fieldScreenHeight = fieldHeight * cellSize
+                fieldScreenWidth  = fieldWidth * cellSize
                 fieldCenterShiftX = (w - fieldScreenWidth) / 2
                 fieldCenterShiftY = (h - fieldScreenHeight) / 2
                 
                 window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp));
             }
+            
             function draw(ctx, w, h, timestamp) {
                 ctx.fillStyle = 'black'
                 ctx.beginPath()
@@ -93,18 +61,21 @@
                 // Код рисования поля
                 for (let y = 0; y < fieldHeight; ++y) {
                     for (let x = 0; x < fieldWidth; ++x) {
+
                         const screenX = fieldCenterShiftX + x * cellSize
                         const screenY = fieldCenterShiftY + y * cellSize
+
                         ctx.fillStyle = 'gray'
                         ctx.beginPath()
                         ctx.rect(screenX + 1, screenY + 1, cellSize - 2, cellSize - 2)
                         ctx.fill()
                     }
                 }
-                // код рисования игровых объектов
-                for (const [id, gameObject] of Object.entries(gameObjects)) {
+                // Код рисования игровых объектов
+                for (const [_, gameObject] of Object.entries(gameObjects)) {
                     const screenX = fieldCenterShiftX + gameObject.x * cellSize
                     const screenY = fieldCenterShiftY + gameObject.y * cellSize
+                    
                     ctx.fillStyle = gameObject.c
                     ctx.beginPath()
                     ctx.rect(screenX + 1, screenY + 1, cellSize - 2, cellSize - 2)
